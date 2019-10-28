@@ -1,5 +1,4 @@
 import pygame 
-from pygame.sprite import Group 
 
 from snake_register import Register
 
@@ -48,10 +47,6 @@ class Game_view:
     def draw_snake_body(self, body):
         """画蛇身"""
         for pos in body:
-            #snake = Snake_body(self.screen, pos)
-            #self.body.add(snake)
-        #self.body.draw(self.screen)
-        #self.body.empty()
             b_x, b_y = self.scale_pos(pos)
             pos_rect = pygame.Rect(b_x, b_y, self.scale, self.scale)
             pygame.draw.rect(self.screen, self.body_color, pos_rect)
