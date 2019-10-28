@@ -39,9 +39,8 @@ class Game_control:
     def check_keydown_events(self,event):
         """解析按键响应"""
         
-        if event.key == pygame.K_ESCAPE:
+        if event.key == pygame.K_ESCAPE and self.live == True:
             #跳转到bg_2
-            #self.stop_bgm()
             pygame.mouse.set_visible(True)#显示光标
             self.flag_start = False
             self.flag_2 = True
@@ -133,7 +132,22 @@ class Game_control:
 
 
     #绘画控制
-
+     def init_walls(self):
+        """初始化周围一圈墙"""
+        wall_init = []
+        for x in range(17,112):
+            y = 0
+            wall_init.append((x,y))
+            y = 69
+            wall_init.append((x,y))
+        for y in range(1,70):
+            x = 17
+            wall_init.append((x,y))
+            x = 111
+            wall_init.append((x,y))
+        self.view.draw_walls(wall_init)
+    
+    
     def snake_head_pos(self,player,flag):
         """指令画蛇头，向view传输蛇头的点"""
         head_pos = player['snake']['head']
@@ -174,13 +188,13 @@ class Game_control:
         self.view.draw_apples(apples)
         #self.client.sync_world()
 
-    #更改 初始化的墙删除
-    #更改，对玩家成绩进行排序
-    def rank_player(self):
 
+    def rank_player(self):
+        """对玩家成绩进行排序"""
         temp = self.client.players[:]
         temp.append(self.client.user)
-        rank = sorted(temp, key=operator.itemgetter('score'))  
+        rank = sorted(temp, key=operator.itemgetter('score')) 
+        rank.reverse()
         return rank
 
     #改动
@@ -218,10 +232,12 @@ class Game_control:
         process = "process:\n" + str(len(self.client.game_map['walls'])/10) +"%"
         self.view.draw_text(process, (x, y))
 
-        if self.live == False:
-            text = " 游戏结束，你可以继续观看游戏，若要退出游戏请按F1 " 
-            x,y = 560, 0
-            self.view.draw_text_1(text, (x, y))
+        
+    def show_end_board(self):
+        """游戏结束字"""
+        text = " 游戏结束，你可以继续观看游戏，若要退出游戏请按F1 " 
+        x,y = 560, 0
+        self.view.draw_text_1(text, (x, y))
 
     #bgm
 
@@ -242,7 +258,7 @@ class Game_control:
         clock = pygame.time.Clock()
         temp = 0
         self.view.draw_map_all()
-        self.view.draw_board()
+        self.init_walls()
 
         #判断初始蛇头方向
         h_x = self.client.user['snake']['head']['x']
@@ -283,7 +299,12 @@ class Game_control:
                 self.live = True
             else:
                 self.live = False
-
+                
+            if self.live == False:
+                self.view.draw_map_all()
+                self.init_wall()
+                self.view.draw_board()
+                
             if flag == 0 and ( res['res'] == 'suc' or res['res'] == 'fdie' ):
                     self.view.draw_map_piece((res['data']['pos']['x'],res['data']['pos']['y']))
             if flag == 0 and self.live:
@@ -300,10 +321,12 @@ class Game_control:
                     self.snake_head_pos(player,2)
 
             self.walls_pos() 
+            self.view.draw_board()
             self.show_board()
 
-            #if self.live == False:
-                #self.view.draw_end()
+            if self.live == False:
+                self.view.draw_end()
+                self.show_end_board()
 
             pygame.display.update()
             pygame.display.flip()
